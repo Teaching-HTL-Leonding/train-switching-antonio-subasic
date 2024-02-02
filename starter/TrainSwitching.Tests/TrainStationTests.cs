@@ -1,5 +1,5 @@
 using TrainSwitching.Logic;
-using static TrainSwitching.Logic.Constants;
+using static TrainSwitching.Logic.Enums;
 
 namespace TrainSwitching.Tests;
 
@@ -19,7 +19,7 @@ public class TrainStationTests
     public void TryApplyOperation_InvalidDirectionForTrack9And10_ReturnsFalse()
     {
         var station = new TrainStation();
-        var op = new SwitchingOperation { TrackNumber = 9, Direction = DIRECTION_EAST };
+        var op = new SwitchingOperation { TrackNumber = 9, Direction = Direction.East };
         Assert.False(station.TryApplyOperation(op));
     }
 
@@ -27,54 +27,54 @@ public class TrainStationTests
     public void TryApplyOperation_AddOperation_AddsWagonToTrack()
     {
         var station = new TrainStation();
-        var op = new SwitchingOperation { TrackNumber = 1, OperationType = OPERATION_ADD, WagonType = WAGON_TYPE_FREIGHT, Direction = DIRECTION_EAST };
+        var op = new SwitchingOperation { TrackNumber = 1, OperationType = Operation.Add, WagonType = Wagon.Freight, Direction = Direction.East };
         Assert.True(station.TryApplyOperation(op));
-        Assert.Contains(WAGON_TYPE_FREIGHT, station.Tracks[0].Wagons);
+        Assert.Contains(Wagon.Freight, station.Tracks[0].Wagons);
     }
 
     [Fact]
     public void TryApplyOperation_RemoveOperation_RemovesWagonFromTrack()
     {
         var station = new TrainStation();
-        var addOp = new SwitchingOperation { TrackNumber = 1, OperationType = OPERATION_ADD, WagonType = WAGON_TYPE_FREIGHT, Direction = DIRECTION_EAST };
+        var addOp = new SwitchingOperation { TrackNumber = 1, OperationType = Operation.Add, WagonType = Wagon.Freight, Direction = Direction.East };
         Assert.True(station.TryApplyOperation(addOp));
-        var removeOp = new SwitchingOperation { TrackNumber = 1, OperationType = OPERATION_REMOVE, NumberOfWagons = 1, Direction = DIRECTION_EAST };
+        var removeOp = new SwitchingOperation { TrackNumber = 1, OperationType = Operation.Remove, NumberOfWagons = 1, Direction = Direction.East };
         Assert.True(station.TryApplyOperation(removeOp));
-        Assert.DoesNotContain(WAGON_TYPE_FREIGHT, station.Tracks[0].Wagons);
+        Assert.DoesNotContain(Wagon.Freight, station.Tracks[0].Wagons);
     }
 
     [Fact]
     public void TryApplyOperation_RemoveOperation_TooManyWagons()
     {
         var station = new TrainStation();
-        var addOp = new SwitchingOperation { TrackNumber = 1, OperationType = OPERATION_ADD, WagonType = WAGON_TYPE_FREIGHT, Direction = DIRECTION_EAST };
+        var addOp = new SwitchingOperation { TrackNumber = 1, OperationType = Operation.Add, WagonType = Wagon.Freight, Direction = Direction.East };
         Assert.True(station.TryApplyOperation(addOp));
-        var removeOp = new SwitchingOperation { TrackNumber = 1, OperationType = OPERATION_REMOVE, NumberOfWagons = 2, Direction = DIRECTION_EAST };
+        var removeOp = new SwitchingOperation { TrackNumber = 1, OperationType = Operation.Remove, NumberOfWagons = 2, Direction = Direction.East };
         Assert.False(station.TryApplyOperation(removeOp));
-        Assert.Contains(WAGON_TYPE_FREIGHT, station.Tracks[0].Wagons);
+        Assert.Contains(Wagon.Freight, station.Tracks[0].Wagons);
     }
 
     [Fact]
     public void TryApplyOperation_RemoveOperation_RemovesFromRightDirection()
     {
         var station = new TrainStation();
-        var addOp = new SwitchingOperation { TrackNumber = 1, OperationType = OPERATION_ADD, WagonType = WAGON_TYPE_FREIGHT, Direction = DIRECTION_EAST };
+        var addOp = new SwitchingOperation { TrackNumber = 1, OperationType = Operation.Add, WagonType = Wagon.Freight, Direction = Direction.East };
         Assert.True(station.TryApplyOperation(addOp));
-        addOp = new SwitchingOperation { TrackNumber = 1, OperationType = OPERATION_ADD, WagonType = WAGON_TYPE_CAR_TRANSPORT, Direction = DIRECTION_EAST };
+        addOp = new SwitchingOperation { TrackNumber = 1, OperationType = Operation.Add, WagonType = Wagon.CarTransport, Direction = Direction.East };
         Assert.True(station.TryApplyOperation(addOp));
-        var removeOp = new SwitchingOperation { TrackNumber = 1, OperationType = OPERATION_REMOVE, NumberOfWagons = 1, Direction = DIRECTION_WEST };
+        var removeOp = new SwitchingOperation { TrackNumber = 1, OperationType = Operation.Remove, NumberOfWagons = 1, Direction = Direction.West };
         Assert.True(station.TryApplyOperation(removeOp));
-        Assert.DoesNotContain(WAGON_TYPE_FREIGHT, station.Tracks[0].Wagons);
-        Assert.Contains(WAGON_TYPE_CAR_TRANSPORT, station.Tracks[0].Wagons);
+        Assert.DoesNotContain(Wagon.Freight, station.Tracks[0].Wagons);
+        Assert.Contains(Wagon.CarTransport, station.Tracks[0].Wagons);
     }
 
     [Fact]
     public void TryApplyOperation_TrainLeaveOperation_ClearsTrack()
     {
         var station = new TrainStation();
-        var addOp = new SwitchingOperation { TrackNumber = 1, OperationType = OPERATION_ADD, WagonType = WAGON_TYPE_LOCOMOTIVE, Direction = DIRECTION_EAST };
+        var addOp = new SwitchingOperation { TrackNumber = 1, OperationType = Operation.Add, WagonType = Wagon.Locomotive, Direction = Direction.East };
         station.TryApplyOperation(addOp);
-        var leaveOp = new SwitchingOperation { TrackNumber = 1, OperationType = OPERATION_TRAIN_LEAVE };
+        var leaveOp = new SwitchingOperation { TrackNumber = 1, OperationType = Operation.TrainLeave };
         Assert.True(station.TryApplyOperation(leaveOp));
         Assert.Empty(station.Tracks[0].Wagons);
     }
@@ -83,9 +83,9 @@ public class TrainStationTests
     public void TryApplyOperation_TrainLeaveOperation_NoLocomotive_ReturnsFalse()
     {
         var station = new TrainStation();
-        var addOp = new SwitchingOperation { TrackNumber = 1, OperationType = OPERATION_ADD, WagonType = WAGON_TYPE_PASSENGER, Direction = DIRECTION_EAST };
+        var addOp = new SwitchingOperation { TrackNumber = 1, OperationType = Operation.Add, WagonType = Wagon.Passenger, Direction = Direction.East };
         station.TryApplyOperation(addOp);
-        var leaveOp = new SwitchingOperation { TrackNumber = 1, OperationType = OPERATION_TRAIN_LEAVE };
+        var leaveOp = new SwitchingOperation { TrackNumber = 1, OperationType = Operation.TrainLeave };
         Assert.False(station.TryApplyOperation(leaveOp));
         Assert.NotEmpty(station.Tracks[0].Wagons);
     }
