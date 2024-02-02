@@ -34,4 +34,37 @@ public static class SwitchingOperationParser
 
         return operation;
     }
+
+    public static SwitchingOperation Parse(byte[] inputBytes)
+    {
+        int track = inputBytes[0] >> 4;
+        var operationType = (Enums.Operation)(inputBytes[0] & 0b00001111);
+        var direction = (Enums.Direction)(inputBytes[1] >> 7);
+
+        var operation = new SwitchingOperation
+        {
+            TrackNumber = track,
+            OperationType = operationType,
+            Direction = direction
+        };
+
+        switch (operationType)
+        {
+            case Enums.Operation.Add:
+                operation.WagonType = (inputBytes[1] & 0b01111111) switch 
+                {
+                    0 => Enums.Wagon.Passenger,
+                    1 => Enums.Wagon.Locomotive,
+                    2 => Enums.Wagon.Freight,
+                    3 => Enums.Wagon.CarTransport,
+                    _ => throw new InvalidOperationException("Invalid input")
+                };
+                break;
+            case Enums.Operation.Remove:
+                operation.NumberOfWagons = inputBytes[1] & 0b01111111;
+                break;
+        }
+
+        return operation;
+    }
 }

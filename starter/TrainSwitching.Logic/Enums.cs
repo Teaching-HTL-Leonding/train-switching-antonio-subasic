@@ -6,7 +6,7 @@ public static class Enums
     {
         Add = 1,
         TrainLeave = 0,
-        Remove = -1
+        Remove = 2
     }
 
     public enum Wagon
