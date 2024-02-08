@@ -27,11 +27,9 @@ public class TrainStation
             var track = Tracks[op.TrackNumber - 1];
 
             var removeInvalid = op.OperationType == Enums.Operation.Remove && (op.NumberOfWagons > track.Wagons.Count || (op.TrackNumber >= 9 && op.Direction == Enums.Direction.East));
-            var leaveInvalid = op.OperationType == Enums.Operation.TrainLeave && track.Wagons.All(wagon => wagon != Enums.Wagon.Locomotive);
+            var leaveInvalid = op.OperationType == Enums.Operation.TrainLeave && !track.Wagons.Contains(Enums.Wagon.Locomotive);
 
-            var possible = !(removeInvalid || leaveInvalid);
-
-            if (possible)
+            if (!(removeInvalid || leaveInvalid))
             {
                 if (op.OperationType == Enums.Operation.Add)
                 {
@@ -41,15 +39,15 @@ public class TrainStation
                 else if (op.OperationType == Enums.Operation.Remove)
                 {
                     track.Wagons.RemoveRange(
-                        op.Direction == Enums.Direction.West
-                        ? 0
-                        : track.Wagons.Count - op.NumberOfWagons!.Value, op.NumberOfWagons!.Value
+                        op.Direction == Enums.Direction.West ? 0 : track.Wagons.Count - op.NumberOfWagons!.Value,
+                        op.NumberOfWagons!.Value
                     );
                 }
                 else if (op.OperationType == Enums.Operation.TrainLeave) { track.Wagons.Clear(); }
+            
+                return true;
             }
-
-            return possible;
+            else { return false; }
         }
     }
 
@@ -60,15 +58,5 @@ public class TrainStation
     /// <remarks>
     /// See readme.md for details on how to calculate the checksum.
     /// </remarks>
-    public int CalculateChecksum()
-    {
-        var checksum = 0;
-
-        for (var i = 0; i < Tracks.Length; i++)
-        {
-            checksum += (i + 1) * Tracks[i].Wagons.Select(wagon => (int)wagon).Sum();
-        }
-
-        return checksum;
-    }
+    public int CalculateChecksum() => Tracks.Select((track, index) => (index + 1) * track.Wagons.Select(wagon => (int)wagon).Sum()).Sum();
 }
